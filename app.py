@@ -1,5 +1,6 @@
 from wsgiref.simple_server import make_server
-from server import WSGIRequestHandler
+from request_handler import WSGIRequestHandler
+from server import Server
 
 class PseudoFlask:
     def __init__(self):
@@ -37,9 +38,6 @@ class PseudoFlask:
             self.__route[endpoint] = func
         return controller
     
-    
-
-
 pseudo_flask = PseudoFlask()
 
 
@@ -51,8 +49,5 @@ def home():
 def ping():
     return "pong"
 
-
-httpd = make_server("127.0.0.1", 9000, pseudo_flask, handler_class=WSGIRequestHandler)
-# httpd = make_server("127.0.0.1", 9000, pseudo_flask)
-
-httpd.serve_forever()
+httpd = Server(("127.0.0.1", 9000), pseudo_flask)
+httpd.forever()
