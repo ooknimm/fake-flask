@@ -6,7 +6,7 @@ class FakeFlask:
     def __init__(self):
         self.__route: Dict[str, Callable] = {}
 
-    def __call__(self, environ: Dict[str, str], start_response: Callable[[str, str], None]) -> "FakeFlask":
+    def __call__(self, environ: Dict[str, str], start_response: Callable[[str, List[Tuple[str, str]], None]]) -> "FakeFlask":
         self.environ = environ
         self.start_response = start_response
         return self
@@ -30,7 +30,7 @@ class FakeFlask:
             return self.__route[endpoint]
         return None
     
-    def __get_response(self, controller: Callable, *args) -> Tuple[str, List[str], str]:
+    def __get_response(self, controller: Callable, *args) -> Tuple[str, List[Tuple[str, str]], str]:
         if not controller:
             return "404 NOT FOUND", [("Content-Type", "text/plain")], "NOT FOUND"
         try:
