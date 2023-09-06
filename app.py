@@ -2,7 +2,7 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple, Iterable
 
 
-class PseudoFlask:
+class FakeFlask:
     def __init__(self):
         self.__route: Dict[str, Callable] = {}
 

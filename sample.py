@@ -1,8 +1,8 @@
     
-from app import PseudoFlask
+from app import FakeFlask
 
 
-pseudo_flask = PseudoFlask()
+pseudo_flask = FakeFlask()
 
 
 @pseudo_flask.route("/")
