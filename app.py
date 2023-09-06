@@ -1,5 +1,5 @@
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Iterable
+from typing import Callable, Dict, List, Optional, Tuple, Iterable
 
 
 class FakeFlask:
@@ -12,20 +12,20 @@ class FakeFlask:
         return self
     
     def __iter__(self) -> Iterable[bytes]:
-        endpoint, query = self.__url_parser()
-        controller = self.__controller(endpoint=endpoint)
+        endpoint, query = self.__parse_urn()
+        controller = self.__get_controller(endpoint=endpoint)
         status_code, response_headers, response = self.__get_response(controller)
         self.start_response(status_code, response_headers)
         yield response.encode("utf-8")
 
-    def __url_parser(self) -> Tuple[str, str]:
+    def __parse_urn(self) -> Tuple[str, str]:
         endpoint = self.environ["PATH_INFO"]
         query = self.environ["QUERY_STRING"]
         if query:
             query = {key: value for key, value in [u.split("=") for u in query.split("&")]}
         return endpoint, query
     
-    def __controller(self, endpoint: str) -> Optional[Callable]:
+    def __get_controller(self, endpoint: str) -> Optional[Callable]:
         if endpoint in self.__route:
             return self.__route[endpoint]
         return None
