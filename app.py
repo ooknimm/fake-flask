@@ -6,7 +6,7 @@ class FakeFlask:
     def __init__(self):
         self.__route: Dict[str, Callable] = {}
 
-    def __call__(self, environ: Dict[str, str], start_response: Callable[[str, List[Tuple[str, str]], None]]) -> "FakeFlask":
+    def __call__(self, environ: Dict[str, str], start_response: Callable[[str, List[Tuple[str, str]]], None]) -> "FakeFlask":
         self.environ = environ
         self.start_response = start_response
         return self
