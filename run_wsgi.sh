@@ -1,0 +1,1 @@
+uwsgi --http :9000 --wsgi sample.sample:app --threads 2

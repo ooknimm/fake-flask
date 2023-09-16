@@ -66,6 +66,7 @@ class RequestHandler:
             "PATH_INFO": path_info,
             "QUERY_STRING": request_url.query,
             "REQUEST_METHOD": command,
+            "wsgi.input": self.rfile
         }
         for key, value in headers.items():
             key = key.upper().replace("-", "_")
