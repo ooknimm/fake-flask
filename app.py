@@ -1,6 +1,7 @@
 
 from typing import Callable, Dict, List, Optional, Tuple, Iterable
 from context import RequestContext, AppContext, request as request, g as g, current_app as current_app
+import os
 
 class FakeFlask:
     def __init__(self) -> None:
@@ -57,7 +58,21 @@ class FakeFlask:
         app_ctx.pop()
         req_ctx.pop()
 
-    def run(self) -> None:
-        from server import Server
-        httpd = Server(("127.0.0.1", 9000), self)
-        httpd.forever()
+    def run(self, debug: bool = False) -> None:
+        from http_server import Server
+        if os.environ.get("SERVER_FD"):
+            fd = int(os.environ["SERVER_FD"])
+        else:
+            fd = None
+        httpd = Server(("127.0.0.1", 9001), self, fd)
+        os.environ["SERVER_FD"] = str(httpd.fileno())
+        if debug:
+            from reloader import run_with_reloader
+            try:
+                run_with_reloader(
+                    httpd.forever
+                )
+            finally:
+                httpd.close()
+        else: 
+            httpd.forever()
