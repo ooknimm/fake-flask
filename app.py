@@ -38,7 +38,8 @@ class FakeFlask:
             return "404 NOT FOUND", [("Content-Type", "text/plain")], "NOT FOUND"
         try:
             response_body = controller(*args)
-        except:
+        except Exception as e:
+            print(e)
             return "500 INTERNAL ERROR", [("Content-Type", "text/plain")], "INTERNAL ERROR"
         return "200 OK", [("Content-Type", "text/plain")], response_body
     
@@ -58,13 +59,14 @@ class FakeFlask:
         app_ctx.pop()
         req_ctx.pop()
 
-    def run(self, debug: bool = False) -> None:
+    def run(self, port: int, debug: bool = False) -> None:
         from http_server import Server
         if os.environ.get("SERVER_FD"):
             fd = int(os.environ["SERVER_FD"])
         else:
             fd = None
-        httpd = Server(("127.0.0.1", 9001), self, fd)
+        httpd = Server(("127.0.0.1", port), self, fd)
+        httpd.socket.set_inheritable(True)
         os.environ["SERVER_FD"] = str(httpd.fileno())
         if debug:
             from reloader import run_with_reloader

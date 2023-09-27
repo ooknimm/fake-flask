@@ -29,7 +29,6 @@ class RequestHandler:
             self.finish()
         
     def setup(self) -> None:
-        self.request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.rfile = self.request.makefile("rb", -1)
         self.wfile = _SocketWriter(self.request)
 

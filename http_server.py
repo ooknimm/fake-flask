@@ -8,20 +8,22 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_address = server_address
         self.application = application
-        self.fd = fd
         self.finish = False
-        self.bind()
+        self.bind(fd=fd)
         self.activate()
 
     def fileno(self) -> int:
         return self.socket.fileno()
     
-    def bind(self) -> None:
-        if self.fd:
-            self.socket = socket.fromfd(self.fd, socket.AF_INET, socket.SOCK_STREAM)
+    def bind(self, fd: Optional[int]) -> None:
+        if fd is not None:
+            self.close()
+            self.socket = socket.fromfd(fd, socket.AF_INET, socket.SOCK_STREAM, )
             self.server_address = self.socket.getsockname()
         else:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             self.socket.bind(self.server_address)
 
     def activate(self) -> None:
@@ -37,7 +39,7 @@ class Server:
         try:
             with selectors.SelectSelector() as selector:
                 selector.register(self, selectors.EVENT_READ)
-                while self.finish:
+                while not self.finish:
                     ready = selector.select(0.5)
                     if ready:
                         self.handle_request()

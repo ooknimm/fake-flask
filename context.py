@@ -3,6 +3,8 @@ from functools import partial
 import json
 from typing import Any, Callable, Dict, Optional, cast, IO, TYPE_CHECKING
 from operator import attrgetter
+import io
+import functools
 if TYPE_CHECKING:
     from app import FakeFlask
 
@@ -71,13 +73,20 @@ class Request:
         self.method = environ.get("REQUEST_METHOD", "GET")
         self.path = path
         self.query = query
-        self.stream = cast(IO[bytes], environ["wsgi.input"])
-
+        self.environ = environ
+        self.stream = cast(io.BufferedReader, self.environ["wsgi.input"])
+    
+    def read_stream(self):
+        content_length = self.environ.get("CONTENT_LENGTH")
+        if content_length is not None:
+            return self.stream.read(int(content_length))
+        return self.stream.read1()
+        
     def get_json(self) -> Any:
         print(f"request data stream: {self.stream}")
-        return json.loads(self.stream.read())
+        return json.loads(self.read_stream())
     
-
+    
 class AppCtxGlobals: 
     def __getattr__(self, name: str) -> Any:
         try:
