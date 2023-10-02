@@ -1,6 +1,6 @@
 import socket
 import selectors
-from typing import Callable, Optional
+from typing import Any, Callable, Optional, Tuple
 from request_handler import RequestHandler
 
 class Server:
@@ -32,7 +32,7 @@ class Server:
     def close(self) -> None:
         self.socket.close()
     
-    def accept(self) -> None:
+    def accept(self) -> Tuple[socket.socket, Any]:
         return self.socket.accept()
     
     def forever(self) -> None:

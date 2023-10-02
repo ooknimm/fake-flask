@@ -3,34 +3,19 @@ import io
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlsplit
 
-class _SocketWriter(io.BufferedIOBase):
-    def __init__(self, sock: socket.socket):
-        self._socket = sock
-    
-    def write(self, b):
-        self._socket.sendall(b)
-        
-    def fileno(self):
-        return self._socket.fileno()
-
 
 class RequestHandler:
     def __init__(self, request: socket.socket, application: Callable[[Dict[str, str], Callable[[str, str], None]], Iterable[bytes]]) -> None:
-        self.request = request
         self.application = application
-        self.rfile: io.BufferedReader
-        self.wfile: _SocketWriter
+        self.rfile: io.BufferedReader = request.makefile("rb", -1)
+        self.wfile: io.BufferedWriter = request.makefile("wb", -1)
         self.status: Optional[str] = None
         self.headers: List[Tuple[str, str]] = []
-        self.setup()
         try:
             self.handle()
         finally:
             self.finish()
         
-    def setup(self) -> None:
-        self.rfile = self.request.makefile("rb", -1)
-        self.wfile = _SocketWriter(self.request)
 
     def handle(self) -> None:
         raw_requestline = self.rfile.readline(65537)
